@@ -1,0 +1,139 @@
+package com.stronans.hydromodelweb.controller;
+
+import com.stronans.hydromodelweb.colours.ColourSet;
+import com.stronans.hydromodelweb.pca9685.PCA9685GpioRGBLEDs;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.stronans.hydromodelweb.colours.ColourSet.*;
+import static com.stronans.hydromodelweb.pca9685.PCA9685GpioRGBLEDs.FULL_ON;
+import static com.stronans.hydromodelweb.utilities.Hardware.delaySeconds;
+
+@Component
+@RestController
+@RequestMapping("/hydromodel/api")
+public class HydroRestController {
+    /**
+     * The <code>Logger</code> to be used.
+     */
+    private static Logger log = LogManager.getLogger(HydroRestController.class);
+    private final PCA9685GpioRGBLEDs provider = new PCA9685GpioRGBLEDs();
+    private boolean inSequence;
+    private List<ColourSet> fullColour, purpleColour, cyanColour, greenBlueColour, redBlueColour;
+
+    public HydroRestController() {
+        this.inSequence = false;
+        fullColour = setFullColour();
+        purpleColour = setPurpleColour();
+        cyanColour = setCyanColour();
+        greenBlueColour = setGreenBlueColour();
+        redBlueColour = setRedBlueColour();
+    }
+
+    @RequestMapping("/colour")
+    public void colourLightsSequence() {
+        process(fullColour);
+    }
+
+    @RequestMapping("/purple")
+    public void purpleLightsSequence() {
+        process(purpleColour);
+    }
+
+    @RequestMapping("/cyan")
+    public void cyanLightsSequence() {
+        process(cyanColour);
+    }
+
+    @RequestMapping("/greenblue")
+    public void greenBlueLightsSequence() {
+        process(greenBlueColour);
+    }
+
+    @RequestMapping("/redblue")
+    public void redBlueLightsSequence() {
+        process(redBlueColour);
+    }
+
+    private void process(List<ColourSet> colours) {
+        if(inSequence) {
+            return;
+        }
+
+        inSequence = true;
+        log.info("Starting lights sequence selected from REST");
+
+        int index = 0;
+        ColourSet colour = colours.get(index);
+
+        for (int j = 0; j < 5; j++) {
+            for (int i = 0; i < 10; i++) {
+                provider.setLED(i, colour, FULL_ON);
+                colour = colours.get(index++);
+
+                if(index == colours.size()) {
+                    index = 0;
+                }
+            }
+            delaySeconds(10);
+        }
+
+        for (int i = 0; i < 10; i++) {
+            provider.setLEDOff(i);
+        }
+
+        log.info("Finished lights sequence");
+        inSequence = false;
+    }
+
+    private List<ColourSet> setFullColour() {
+        List<ColourSet>result = new ArrayList<>();
+
+        result.add(Blue);
+        result.add(Green);
+        result.add(Magenta);
+        result.add(RegalRed);
+        result.add(Yellow);
+        result.add(ForestGreen);
+        result.add(Cyan);
+        result.add(LightBlue);
+        result.add(Purple);
+//        result.add(DustyRose);
+//        result.add(BananaYellow);
+
+        return result;
+    }
+
+    private List<ColourSet> setPurpleColour() {
+        List<ColourSet>result = new ArrayList<>();
+        result.add(Purple);
+        return result;
+    }
+
+    private List<ColourSet> setCyanColour() {
+        List<ColourSet>result = new ArrayList<>();
+        result.add(Cyan);
+        return result;
+    }
+
+    private List<ColourSet> setGreenBlueColour() {
+        List<ColourSet>result = new ArrayList<>();
+        result.add(Green);
+        result.add(Blue);
+        result.add(Green);
+        return result;
+    }
+
+    private List<ColourSet> setRedBlueColour() {
+        List<ColourSet>result = new ArrayList<>();
+        result.add(Red);
+        result.add(Aquamarine);
+        return result;
+    }
+}

@@ -1,0 +1,13 @@
+/.idea
+/.git
+/output
+/project
+/target
+/release
+project/project
+/node_modules
+/libraries
+*.iml
+logs/
+hydrogui/e2e/
+src/main/resources/public/

@@ -1,0 +1,45 @@
+/* Show only to IE PC \*/
+* html .boxhead h2 {
+  height: 1%;
+}
+
+/* For IE 5 PC */
+
+.sidebox {
+  margin: 0 auto; /* center for now */
+  width: 17em; /* ems so it will grow */
+  background: url('assets/RightBorders1.gif') no-repeat bottom right;
+  font-size: 100%
+}
+
+.boxhead {
+  background: url('assets/RightBorders1.gif') no-repeat top right;
+  margin: 0;
+  padding: 0;
+  text-align: center
+}
+
+.boxhead h2 {
+  background: url('assets/LeftBorders1.gif') no-repeat top left;
+  margin: 0;
+  color: black;
+  font-weight: bold;
+  font-size: 1.6em;
+  line-height: 1em;
+  text-shadow: rgba(0, 0, 0, .4) 0px 2px 5px;
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-top: 22px;
+  padding-bottom: 5px
+}
+
+.boxbody {
+  background: url('assets/LeftBorders1.gif') no-repeat bottom left;
+  font-weight: bold;
+  margin: 0;
+  text-align: center;
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-top: 5px;
+  padding-bottom: 31px
+}

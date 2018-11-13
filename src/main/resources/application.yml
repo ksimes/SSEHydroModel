@@ -1,0 +1,19 @@
+# Tomcat public facing port for all uri
+server:
+  port: 4800
+
+# Log4j2 configuration
+logging:
+  file: logs/logging.log
+  pattern:
+#    console: "%d %-5level %logger : %msg%n"
+    file: "%d %-5level [%thread] %logger : %msg%n"
+  level:
+    com.stronans: DEBUG
+
+# Spring actuator endpoints
+management:
+  context-path: /hydromodel/api/data
+  security:
+    enabled: false
+
