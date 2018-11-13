@@ -1,6 +1,6 @@
 # Tomcat public facing port for all uri
 server:
-  port: 4800
+  port: 5800
 
 # Log4j2 configuration
 logging:
