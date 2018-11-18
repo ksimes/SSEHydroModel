@@ -8,8 +8,8 @@ logging:
   pattern:
     console: "%d %-5level [%thread] %logger : %msg%n"
     file: "%d %-5level [%thread] %logger : %msg%n"
-  level:
-    com.stronans: DEBUG
+#  level:
+#    com.stronans: DEBUG
 
 # Spring actuator endpoints
 management:
