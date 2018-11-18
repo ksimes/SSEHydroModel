@@ -80,7 +80,7 @@ public class HydroRestController {
     }
 
     private void decrement(List<ColourSet> colours) {
-        int index = colours.size();
+        int index = colours.size() - 1;
         ColourSet colour;
 
         for (int i = 0; i < NUM_LEDS; i++) {
