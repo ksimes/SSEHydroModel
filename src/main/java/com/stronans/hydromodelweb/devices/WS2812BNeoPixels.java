@@ -60,6 +60,14 @@ public class WS2812BNeoPixels implements MessageListener {
 
     @Override
     public void messageReceived() {
-        // will never get a message back
+        try {
+            String message = "";
+            if (!LEDNano.messages().isEmpty()) {
+                message = LEDNano.messages().take();
+                log.info("Msg from LED Nano :" + message);
+            }
+        } catch (InterruptedException e) {
+            log.error(" Interrupt during sleep : " + e.getMessage(), e);
+        }
     }
 }
