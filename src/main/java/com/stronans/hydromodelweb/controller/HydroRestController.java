@@ -1,7 +1,8 @@
 package com.stronans.hydromodelweb.controller;
 
 import com.stronans.hydromodelweb.colours.ColourSet;
-import com.stronans.hydromodelweb.pca9685.PCA9685GpioRGBLEDs;
+import com.stronans.hydromodelweb.devices.PCA9685GpioRGBLEDs;
+import com.stronans.hydromodelweb.devices.WS2812BNeoPixels;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.stronans.hydromodelweb.colours.ColourSet.*;
-import static com.stronans.hydromodelweb.pca9685.PCA9685GpioRGBLEDs.FULL_ON;
+import static com.stronans.hydromodelweb.devices.PCA9685GpioRGBLEDs.FULL_ON;
 import static com.stronans.hydromodelweb.utilities.Hardware.delaySeconds;
 
 @Component
@@ -23,7 +24,8 @@ public class HydroRestController {
      * The <code>Logger</code> to be used.
      */
     private static Logger log = LogManager.getLogger(HydroRestController.class);
-    private final PCA9685GpioRGBLEDs provider = new PCA9685GpioRGBLEDs();
+//    private final PCA9685GpioRGBLEDs provider = new PCA9685GpioRGBLEDs();
+    private final WS2812BNeoPixels provider = new WS2812BNeoPixels();
     private boolean inSequence;
     private List<ColourSet> fullColour, purpleColour, cyanColour, greenBlueColour, redBlueColour;
 
@@ -70,12 +72,12 @@ public class HydroRestController {
         log.info("Starting lights sequence selected from REST");
 
         int index = 0;
-        ColourSet colour = colours.get(index);
+        ColourSet colour;
 
         for (int j = 0; j < 5; j++) {
             for (int i = 0; i < 10; i++) {
-                provider.setLED(i, colour, FULL_ON);
                 colour = colours.get(index++);
+                provider.setLED(i, colour, FULL_ON);
 
                 if(index == colours.size()) {
                     index = 0;
@@ -98,12 +100,12 @@ public class HydroRestController {
         result.add(Blue);
         result.add(Green);
         result.add(Magenta);
-        result.add(RegalRed);
+        result.add(Red);
         result.add(Yellow);
-        result.add(ForestGreen);
-        result.add(Cyan);
-        result.add(LightBlue);
-        result.add(Purple);
+//        result.add(ForestGreen);
+//        result.add(Cyan);
+//        result.add(LightBlue);
+//        result.add(Purple);
 //        result.add(DustyRose);
 //        result.add(BananaYellow);
 
@@ -126,14 +128,13 @@ public class HydroRestController {
         List<ColourSet>result = new ArrayList<>();
         result.add(Green);
         result.add(Blue);
-        result.add(Green);
         return result;
     }
 
     private List<ColourSet> setRedBlueColour() {
         List<ColourSet>result = new ArrayList<>();
         result.add(Red);
-        result.add(Aquamarine);
+        result.add(Blue);
         return result;
     }
 }

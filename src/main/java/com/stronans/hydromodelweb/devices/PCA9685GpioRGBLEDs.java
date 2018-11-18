@@ -1,6 +1,5 @@
-package com.stronans.hydromodelweb.pca9685;
+package com.stronans.hydromodelweb.devices;
 
-import com.pi4j.component.light.LED;
 import com.pi4j.gpio.extension.pca.PCA9685GpioProvider;
 import com.pi4j.gpio.extension.pca.PCA9685Pin;
 import com.pi4j.io.gpio.GpioController;

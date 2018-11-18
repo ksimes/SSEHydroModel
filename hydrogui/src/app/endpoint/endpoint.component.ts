@@ -31,7 +31,14 @@ export class EndpointComponent implements OnInit {
 
   public refresh(): void {
     if (this.optionSelected != undefined) {
-      this.dataServerService.executeOption(this.optionSelected.url);
+      this.dataServerService.executeOption(this.optionSelected.url)
+        .subscribe((data: string) => data,
+        error => {
+        },
+        () => {
+          console.log('Execute complete');
+        }
+      );
     }
   }
 }
