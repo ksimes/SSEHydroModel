@@ -88,7 +88,7 @@ public class HydroRestController {
             provider.setLED(i, colour, FULL_ON);
 
             if(index == 0) {
-                index = colours.size();
+                index = colours.size() - 1;
             }
         }
     }
