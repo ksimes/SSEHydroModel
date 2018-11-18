@@ -24,6 +24,8 @@ public class HydroRestController {
      * The <code>Logger</code> to be used.
      */
     private static Logger log = LogManager.getLogger(HydroRestController.class);
+
+    private static final int NUM_LEDS = 16;
 //    private final PCA9685GpioRGBLEDs provider = new PCA9685GpioRGBLEDs();
     private final WS2812BNeoPixels provider = new WS2812BNeoPixels();
     private boolean inSequence;
@@ -63,6 +65,34 @@ public class HydroRestController {
         process(redBlueColour);
     }
 
+    private void increment(List<ColourSet> colours) {
+        int index = 0;
+        ColourSet colour;
+
+        for (int i = 0; i < NUM_LEDS; i++) {
+            colour = colours.get(index++);
+            provider.setLED(i, colour, FULL_ON);
+
+            if(index == colours.size()) {
+                index = 0;
+            }
+        }
+    }
+
+    private void decrement(List<ColourSet> colours) {
+        int index = colours.size() - 1;
+        ColourSet colour;
+
+        for (int i = 0; i < NUM_LEDS; i++) {
+            colour = colours.get(index--);
+            provider.setLED(i, colour, FULL_ON);
+
+            if(index == 0) {
+                index = colours.size() - 1;
+            }
+        }
+    }
+
     private void process(List<ColourSet> colours) {
         if(inSequence) {
             return;
@@ -73,20 +103,20 @@ public class HydroRestController {
 
         int index = 0;
         ColourSet colour;
+        boolean flipflop = true;
 
         for (int j = 0; j < 5; j++) {
-            for (int i = 0; i < 10; i++) {
-                colour = colours.get(index++);
-                provider.setLED(i, colour, FULL_ON);
-
-                if(index == colours.size()) {
-                    index = 0;
-                }
+            if(flipflop) {
+                increment(colours);
+                flipflop = false;
+            } else {
+                decrement(colours);
+                flipflop = true;
             }
             delaySeconds(10);
         }
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < NUM_LEDS; i++) {
             provider.setLEDOff(i);
         }
 
