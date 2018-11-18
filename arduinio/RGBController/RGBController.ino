@@ -71,7 +71,10 @@ void setLED(int LEDIndex, long colour, int brightness)
   int green = (colour & 0x00FF00) >> 8;
   int blue = (colour & 0x0000FF);
 
+//  Serial.println("setLED index = " + String(LEDIndex) + " [" + String(red) + " " + String(green) + " " + String(blue) + "]");
+
   leds[LEDIndex] = CRGB(red, green, blue);
+  FastLED.show();
 }
 
 long getLong(String info)
@@ -104,14 +107,14 @@ void processSequence(String sequence) {
     }
     values[index] = getLong(numb);
     sequence = sequence.substring(nextSpace + 1);
-    //    Serial.println("sequence [" + sequence + "]");
+//    Serial.println("sequence [" + sequence + "]");
   }
 
-  //  for (int i = 0; i < 3; i++) {
-  //    Serial.print("Value [");
-  //    Serial.print(values[i]);
-  //    Serial.println("]");
-  //  }
+//    for (int i = 0; i < 3; i++) {
+//      Serial.print("Value [");
+//      Serial.print(values[i]);
+//      Serial.println("]");
+//    }
 }
 
 int refreshCounter = 0;
@@ -140,10 +143,12 @@ int readStatus(int currentState)
   if (msg.length() > 0) {
     if ((msg.length() > MSG_HEADER_SIZE) && msg.startsWith(MSG_HEADER) && msg.endsWith("}")) {
 
+      Serial.println("msg = [" + msg + "]");
+
       String body = msg.substring(MSG_HEADER_SIZE);
       body.trim();  // Trim off white space from both ends.
 
-      //      Serial.println("Body = [" + body + "]");
+//      Serial.println("Body = [" + body + "]");
 
       // Available status values coming from other machine
       if (body.startsWith("R")) {      // RESTING   (Normal state, does nothing)
@@ -154,7 +159,7 @@ int readStatus(int currentState)
       }
       else if (body.startsWith("S")) {      // SETCOLOUR
         String extra = body.substring(1);
-        processSequence(extra);   // Pass in string minus the "Q"
+        processSequence(extra);   // Pass in string minus the "S"
         result = SETCOLOUR;
       }
     }
@@ -174,6 +179,7 @@ void loop()
 
     case SETCOLOUR :
       setSequence();
+      state = RESTING;
       break;
 
     case SEQUENCE :
