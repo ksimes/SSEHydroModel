@@ -32,4 +32,3 @@ Configutation:
           level: debug
           AppenderRef:
             - ref: File_Appender
-              level: debug
