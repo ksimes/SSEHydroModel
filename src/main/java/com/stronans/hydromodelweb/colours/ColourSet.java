@@ -18,7 +18,7 @@ public enum ColourSet {
     Amber(0xFFBF00),
 
     LightBlue(0x009cce),
-    Purple(0xC231E1),
+    Purple(0x800080),           // 0xC231E1
     Mustard(0xffce31),
     DarkOrange(0xe1632e),
     DarkRed(0xce0063),
