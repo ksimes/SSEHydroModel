@@ -45,7 +45,7 @@ public class WS2812BNeoPixels implements MessageListener {
         int colourVal = colour.getVal();
         String msg = "S " + LEDKey + " " + colourVal + " " + brightness;
 
-        log.debug("Set Msg : [" + msg + "]");
+//        log.debug("Set Msg : [" + msg + "]");
 
         LEDNano.sendMessage(msg);
     }
@@ -53,7 +53,7 @@ public class WS2812BNeoPixels implements MessageListener {
     public void setLEDOff(int LEDKey) {
         String msg = "S " + LEDKey + " " + 0 + " " + 0;
 
-        log.debug("Set Off Msg : [" + msg + "]");
+//        log.debug("Set Off Msg : [" + msg + "]");
 
         LEDNano.sendMessage(msg);
     }
