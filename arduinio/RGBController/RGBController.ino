@@ -5,21 +5,17 @@
 // Serial comms speed
 #define SERIAL_SPEED 115200
 
-#define FULL_ON 4095
-#define HALF_ON 2048
-#define QUARTER_ON 1024
-#define EIGHTH_ON 512
+#define FULL_ON 255
+#define HALF_ON 128
+#define QUARTER_ON 64
+#define EIGHTH_ON 32
 #define OFF 0
 
-#define RED_LED 0
-#define BLUE_LED 1
-#define GREEN_LED 2
+// #define BRIGHTNESS  64
+#define BRIGHTNESS  128
 
-// State machine position
-#define RESTING 1
-#define SETCOLOUR 2
-#define SEQUENCE 3
-
+#define LED_TYPE    WS2812B
+#define COLOR_ORDER GRB
 // How many leds are in the strip?
 #define NUM_LEDS 16
 
@@ -29,6 +25,9 @@
 // Clock pin only needed for SPI based chipsets when not using hardware SPI
 //#define CLOCK_PIN 8
 
+CRGBPalette16 currentPalette;
+TBlendType    currentBlending;
+
 // This is an array of leds.  One item for each led in your strip.
 CRGB leds[NUM_LEDS];
 
@@ -36,7 +35,9 @@ const String MSG_HEADER = "{S ";
 const int MSG_HEADER_SIZE = MSG_HEADER.length();
 
 // Changing state of this machine
-int state = RESTING;
+boolean state = true;
+boolean showing = false;
+int count = 0;
 
 // Message processor comming in from Rasp Pi
 Messages *messages;
@@ -44,7 +45,7 @@ Messages *messages;
 void setup()
 {
   delay(2000);
-  FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, NUM_LEDS);
+  FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS);
 
   Serial.begin(SERIAL_SPEED);
   Serial.print("RGB Controller version ");
@@ -55,144 +56,153 @@ void setup()
   clearLEDs();
 }
 
-void clearLEDs()
-{
-   for(int led = 0; led < NUM_LEDS; led++) {
-      // Turn our current led to black
-      leds[led] = CRGB::Black;
-      // Show the leds all now set to black
-      FastLED.show();
-   }
+void setTwoTone(CRGB first, CRGB second) {
+  currentPalette = CRGBPalette16(
+                     first, second, first,  second,
+                     first, second, first,  second,
+                     first, second, first,  second,
+                     first, second, first,  second );
 }
 
-void setLED(int LEDIndex, long colour, int brightness)
+void setColourPalette() {
+  
+  currentPalette = CRGBPalette16(
+                     CRGB::Red, CRGB::Blue, CRGB::Green,  CRGB::Yellow,
+                     CRGB::Magenta, CRGB::Purple, CRGB::White,  CRGB::Olive,
+                     CRGB::Ivory, CRGB::Orange, CRGB::SaddleBrown,  CRGB::Silver,
+                     CRGB::Teal, CRGB::YellowGreen, CRGB::DarkRed,  CRGB::Gold );
+}
+
+void setRedBluePalette()
 {
-  int red = (colour & 0xFF0000) >> 16;
-  int green = (colour & 0x00FF00) >> 8;
-  int blue = (colour & 0x0000FF);
+  setTwoTone(CRGB::Blue, CRGB::Red);
+}
 
-//  Serial.println("setLED index = " + String(LEDIndex) + " [" + String(red) + " " + String(green) + " " + String(blue) + "]");
+void setBlueGreenPalette()
+{
+  setTwoTone(CRGB::Blue, CRGB::Green);
+}
 
-  leds[LEDIndex] = CRGB(red, green, blue);
+void setPurplePalette()
+{
+  setTwoTone(CRGB::BlueViolet, CRGB::Purple);
+}
+
+void setCyanPalette()
+{
+  setTwoTone(CRGB::Cyan, CRGB::PowderBlue);
+}
+
+// This function fills the palette with totally random colors.
+void setTotallyRandomPalette()
+{
+  for ( int i = 0; i < 16; i++) {
+    currentPalette[i] = CHSV( random8(), 255, random8());
+  }
+}
+
+void clearLEDs()
+{
+  //    fill_solid( currentPalette, 16, CRGB::Black);
+  for (int led = 0; led < NUM_LEDS; led++) {
+    // Turn our current led to black
+    leds[led] = CRGB::Black;
+  }
+  // Show the leds all now set to black
   FastLED.show();
 }
 
-long getLong(String info)
-{
-  long result = 0;
-  char carray[20];
-
-  //  Serial.println("info [" + info + "]");
-
-  info.toCharArray(carray, sizeof(carray));
-  result = atol(carray);
-
-  return result;
-}
-
-static long values[3] = {0, 0, 0};
-
-void processSequence(String sequence) {
-
-  sequence.trim();
-
-  for (int index = 0; index < 3; index++) {
-    int nextSpace = sequence.indexOf(" ");
-    String numb;
-    if (nextSpace == -1) {  // No space found
-      numb = sequence.substring(0);
-    }
-    else {
-      numb = sequence.substring(0, nextSpace + 1);
-    }
-    values[index] = getLong(numb);
-    sequence = sequence.substring(nextSpace + 1);
-//    Serial.println("sequence [" + sequence + "]");
-  }
-
-//    for (int i = 0; i < 3; i++) {
-//      Serial.print("Value [");
-//      Serial.print(values[i]);
-//      Serial.println("]");
-//    }
-}
-
-int refreshCounter = 0;
-
-void setSequence() {
-  setLED((int)values[0], values[1], (int)values[2]);
-}
-
-int getNumber(String data)
-{
-  int result = 0;
-  char carray[10];
-  data.toCharArray(carray, sizeof(carray));
-  result = atoi(carray);
-
-  return result;
-}
-
 /* Has the other machine sent a message? */
-int readStatus(int currentState)
+void processMessage()
 {
-  int result = currentState;
-
   String msg = messages->read(false);
 
   if (msg.length() > 0) {
     if ((msg.length() > MSG_HEADER_SIZE) && msg.startsWith(MSG_HEADER) && msg.endsWith("}")) {
 
-      Serial.println("msg = [" + msg + "]");
+      //      Serial.println("msg = [" + msg + "]");
 
       String body = msg.substring(MSG_HEADER_SIZE);
       body.trim();  // Trim off white space from both ends.
 
-//      Serial.println("Body = [" + body + "]");
+      //      Serial.println("Body = [" + body + "]");
 
       // Available status values coming from other machine
-      if (body.startsWith("R")) {      // RESTING   (Normal state, does nothing)
-        result = RESTING;
+      if (body.startsWith("RB")) {    // RedBlue
+        showing = true;
+        count = 5;
+        setRedBluePalette();
       }
-      else if (body.startsWith("Q")) {      // SEQUENCE
-        result = SEQUENCE;
+      else if (body.startsWith("BG")) {      // BlueGreen
+        showing = true;
+        count = 5;
+        setBlueGreenPalette();
       }
-      else if (body.startsWith("S")) {      // SETCOLOUR
-        String extra = body.substring(1);
-        processSequence(extra);   // Pass in string minus the "S"
-        result = SETCOLOUR;
+      else if (body.startsWith("PU")) {      // Purple
+        showing = true;
+        count = 5;
+        setPurplePalette();
+      }
+      else if (body.startsWith("CY")) {      // Cyan
+        showing = true;
+        count = 5;
+        setCyanPalette();
+      }
+      else if (body.startsWith("CO")) {      // Colour
+        showing = true;
+        count = 5;
+        setColourPalette();
+      }
+      else if (body.startsWith("WI")) {      // Wild
+        showing = true;
+        count = 25;
+        setTotallyRandomPalette();
+      }
+
+      if (showing) {
+        Serial.println("Ack");
       }
     }
   }
+}
 
-  return result;
+void FillLEDsFromPaletteColorsInc()
+{
+  for ( int i = 0; i < NUM_LEDS; i++) {
+    leds[i] = currentPalette.entries[i];
+  }
+}
+
+void FillLEDsFromPaletteColorsDec()
+{
+  int paletteSize = 15;
+  for ( int i = 0; i < NUM_LEDS; i++) {
+    leds[i] = currentPalette.entries[paletteSize--];
+  }
 }
 
 void loop()
 {
-  state = readStatus(state);
+  messages->anySerialEvent();
+  processMessage();
 
-  switch (state)
-  {
-    case RESTING :
-      break;
+  if (showing) {
+    if (count > 0) {
+      if (state) {
+        FillLEDsFromPaletteColorsInc();
+      } else {
+        FillLEDsFromPaletteColorsDec();
+      }
 
-    case SETCOLOUR :
-      setSequence();
-      state = RESTING;
-      break;
-
-    case SEQUENCE :
-      break;
+      FastLED.show();
+      delay(5000);
+      state = !state;
+      count--;
+    } else {
+      clearLEDs();
+      showing = false;
+    }
   }
 }
 
-/*
-  SerialEvent occurs whenever a new data comes in the
-  hardware serial RX.  This routine is run between each
-  time loop() runs, so using delay inside loop can delay
-  response.  Multiple bytes of data may be available.
-*/
-void serialEvent() {
-  messages->anySerialEvent();
-}
+

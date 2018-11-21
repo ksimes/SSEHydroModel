@@ -14,16 +14,35 @@ Messages::Messages() {
   }
 }
 
-void Messages::anySerialEvent() {
+void Messages::newAnySerialEvent() {
+  if (Serial.available() > 0) {
+    msgs[bufferPointer] = Serial.readStringUntil(CR);
+    msgAvailable = true;
+
+    //      Serial.println("Arduino received [" + msgs[bufferPointer] + "]");
+
+    bufferPointer ++;
+    if (bufferPointer == BUFFER_SIZE) {
+      bufferPointer = 0;
+    }
+
+    // Clean the next buffer so there is no corruption from old messages.
+    msgs[bufferPointer] = "";
+
+    msgCount ++;
+  }
+}
+
+void Messages::oldAnySerialEvent() {
   while (Serial.available() > 0) {
     // get the new byte:
     char inChar = (char)Serial.read();
     // if the incoming character is a newline, set a flag
     // so the main loop can do something about it:
-    if (inChar == '\r') {
+    if (inChar == CR) {
       msgAvailable = true;
 
-//      Serial.println("Arduino received [" + msgs[bufferPointer] + "]");
+      //      Serial.println("Arduino received [" + msgs[bufferPointer] + "]");
 
       bufferPointer ++;
       if (bufferPointer == BUFFER_SIZE) {
@@ -34,7 +53,7 @@ void Messages::anySerialEvent() {
       msgs[bufferPointer] = "";
 
       msgCount ++;
-//      Serial.println("msgCount [+" + String(msgCount) + "]");
+      //      Serial.println("msgCount [+" + String(msgCount) + "]");
 
       //      if (crlf) { // If expecting a cr/lf sequence then check the next character
       //        if (Serial.available()) {
@@ -51,6 +70,10 @@ void Messages::anySerialEvent() {
       msgs[bufferPointer] += inChar;
     }
   }
+}
+
+void Messages::anySerialEvent() {
+  newAnySerialEvent();
 }
 
 /* Has the other machine sent a message? */
@@ -71,10 +94,10 @@ String Messages::read(boolean blocking)
     }
 
     result = String(msgs[lastRead]);
-//    Serial.println("result [" + result + "]");
+    //    Serial.println("result [" + result + "]");
 
     msgCount --;
-//    Serial.println("msgCount [-" + String(msgCount) + "]");
+    //    Serial.println("msgCount [-" + String(msgCount) + "]");
 
     if (msgCount <= 0) {
       msgAvailable = false;

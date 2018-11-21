@@ -4,9 +4,9 @@ PROCESS_ID=`ps -ef | grep "java -jar hydromodel.jar"  | grep -v "grep" | awk '{g
 
 if [ ! -z $PROCESS_ID ]
 then
-	echo "HydroModel is running with PID" $PROCESS_ID
-	kill $PROCESS_ID
-	echo "HydroModel stopped"
+	echo "HydroModel is already running!"
 else
-	echo "HydroModel is NOT running!"
+	java -jar hydromodel.jar &
 fi
+
+

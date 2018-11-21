@@ -1,5 +1,7 @@
-#define BUFFER_SIZE 5
-#define MAX_MSG_SIZE 200
+#define BUFFER_SIZE 10
+#define MAX_MSG_SIZE 50
+
+#define CR '\r'
 
 class Messages {
   private:
@@ -9,9 +11,13 @@ class Messages {
     int lastRead = 0;
     String msgs[BUFFER_SIZE];
 
+    void newAnySerialEvent();
+    void oldAnySerialEvent();
+
   public:    
     Messages();
     void anySerialEvent();
     String read(boolean blocking);
+    
 };
 
