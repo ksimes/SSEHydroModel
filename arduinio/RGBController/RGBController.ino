@@ -38,6 +38,8 @@ const int MSG_HEADER_SIZE = MSG_HEADER.length();
 boolean state = true;
 boolean showing = false;
 int count = 0;
+boolean wild = false;
+static uint8_t startIndex = 0;
 
 // Message processor comming in from Rasp Pi
 Messages *messages;
@@ -65,12 +67,12 @@ void setTwoTone(CRGB first, CRGB second) {
 }
 
 void setColourPalette() {
-  
+
   currentPalette = CRGBPalette16(
                      CRGB::Red, CRGB::Blue, CRGB::Green,  CRGB::Yellow,
                      CRGB::Magenta, CRGB::Purple, CRGB::White,  CRGB::Olive,
-                     CRGB::Ivory, CRGB::Orange, CRGB::SaddleBrown,  CRGB::Silver,
-                     CRGB::Teal, CRGB::YellowGreen, CRGB::DarkRed,  CRGB::Gold );
+                     CRGB::Ivory, CRGB::Orange, CRGB::YellowGreen,  CRGB::Silver,
+                     CRGB::Teal, CRGB::SaddleBrown, CRGB::DarkRed,  CRGB::Navy );
 }
 
 void setRedBluePalette()
@@ -85,12 +87,12 @@ void setBlueGreenPalette()
 
 void setPurplePalette()
 {
-  setTwoTone(CRGB::BlueViolet, CRGB::Purple);
+  setTwoTone(CRGB::Indigo, CRGB::Purple);
 }
 
 void setCyanPalette()
 {
-  setTwoTone(CRGB::Cyan, CRGB::PowderBlue);
+  setTwoTone(CRGB::Cyan, CRGB::LightSkyBlue);
 }
 
 // This function fills the palette with totally random colors.
@@ -153,10 +155,16 @@ void processMessage()
         count = 5;
         setColourPalette();
       }
+      else if (body.startsWith("OF")) {      // OFF
+        showing = false;
+        wild = false;
+        clearLEDs();
+      }
       else if (body.startsWith("WI")) {      // Wild
         showing = true;
-        count = 25;
+        count = 1000;
         setTotallyRandomPalette();
+        wild = true;
       }
 
       if (showing) {
@@ -180,6 +188,15 @@ void FillLEDsFromPaletteColorsDec()
     leds[i] = currentPalette.entries[paletteSize--];
   }
 }
+void FillLEDsFromPaletteColorsWild( uint8_t colorIndex)
+{
+  uint8_t brightness = 255;
+
+  for ( int i = 0; i < NUM_LEDS; i++) {
+    leds[i] = ColorFromPalette( currentPalette, colorIndex, brightness, LINEARBLEND);
+    colorIndex += 3;
+  }
+}
 
 void loop()
 {
@@ -188,19 +205,34 @@ void loop()
 
   if (showing) {
     if (count > 0) {
-      if (state) {
-        FillLEDsFromPaletteColorsInc();
+      if (wild) {
+        startIndex = startIndex + 1; /* motion speed */
+        setTotallyRandomPalette();
+        FillLEDsFromPaletteColorsWild(startIndex);
+
       } else {
-        FillLEDsFromPaletteColorsDec();
+
+        if (state) {
+          FillLEDsFromPaletteColorsInc();
+        } else {
+          FillLEDsFromPaletteColorsDec();
+        }
       }
 
       FastLED.show();
-      delay(5000);
+      
+      if (!wild) {
+        delay(5000);
+      } else {
+        delay(500);
+      }
+      
       state = !state;
       count--;
     } else {
       clearLEDs();
       showing = false;
+      wild = false;
     }
   }
 }

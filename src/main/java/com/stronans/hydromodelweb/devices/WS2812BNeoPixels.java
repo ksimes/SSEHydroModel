@@ -24,7 +24,7 @@ public class WS2812BNeoPixels implements MessageListener {
             LEDNano = new SerialComms(LED_NANO, CONNECTION_SPEED);
             LEDNano.addListener(this);
             LEDNano.startComms();
-            LEDNano.sendMessage("REST");
+//            LEDNano.sendMessage("REST");
 
             Runtime.getRuntime().addShutdownHook(new Thread() {
                                                      @Override
@@ -40,6 +40,13 @@ public class WS2812BNeoPixels implements MessageListener {
             log.error(" ==>> PROBLEMS WITH SERIAL COMMUNICATIONS: " + e.getMessage(), e);
         }
     }
+
+    public void sendSequence(String code) {
+//        log.debug("Send code Msg : [" + msg + "]");
+
+        LEDNano.sendMessage(code);
+    }
+
 
     public void setLED(int LEDKey, ColourSet colour, int brightness) {
         int colourVal = colour.getVal();
@@ -64,7 +71,7 @@ public class WS2812BNeoPixels implements MessageListener {
             String message = "";
             if (!LEDNano.messages().isEmpty()) {
                 message = LEDNano.messages().take();
-                log.info("Msg from LED Nano :" + message);
+                log.info("Msg from LED Nano :" + message.trim());
             }
         } catch (InterruptedException e) {
             log.error(" Interrupt during sleep : " + e.getMessage(), e);

@@ -14,6 +14,8 @@ export class DataOptionsService {
     colour : { id: 'colour', url:'/hydromodel/api/colour', description: 'Hydro Full colour lights' },
     cyan : { id: 'cyan', url:'/hydromodel/api/cyan', description: 'Hydro Cyan lights' },
     greenblue : { id: 'greenblue', url:'/hydromodel/api/greenblue', description: 'Hydro Green Blue lights' },
+    off : { id: 'off', url:'/hydromodel/api/off', description: 'Hydro turn off lights' },
+    wild : { id: 'wild', url:'/hydromodel/api/wild', description: 'Hydro wild lights' },
     redblue : { id: 'redblue', url:'/hydromodel/api/redblue', description: 'Hydro Red Blue lights' }
   };
 
