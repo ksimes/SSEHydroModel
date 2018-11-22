@@ -69,10 +69,10 @@ void setTwoTone(CRGB first, CRGB second) {
 void setColourPalette() {
 
   currentPalette = CRGBPalette16(
-                     CRGB::Red, CRGB::Blue, CRGB::Green,  CRGB::Yellow,
-                     CRGB::Magenta, CRGB::Purple, CRGB::White,  CRGB::Olive,
-                     CRGB::Ivory, CRGB::Orange, CRGB::YellowGreen,  CRGB::Silver,
-                     CRGB::Teal, CRGB::SaddleBrown, CRGB::DarkRed,  CRGB::Navy );
+                     CRGB::Olive, CRGB::YellowGreen, CRGB::Silver,  CRGB::Ivory,
+                     CRGB::Magenta, CRGB::Purple, CRGB::White,  CRGB::Red,
+                     CRGB::Blue, CRGB::Orange, CRGB::Yellow,  CRGB::Green,
+                     CRGB::Navy, CRGB::DarkRed, CRGB::SaddleBrown,  CRGB::Teal );
 }
 
 void setRedBluePalette()
