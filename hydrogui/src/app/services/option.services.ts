@@ -16,7 +16,8 @@ export class DataOptionsService {
     greenblue : { id: 'greenblue', url:'/hydromodel/api/greenblue', description: 'Hydro Green Blue lights' },
     off : { id: 'off', url:'/hydromodel/api/off', description: 'Hydro turn off lights' },
     wild : { id: 'wild', url:'/hydromodel/api/wild', description: 'Hydro wild lights' },
-    redblue : { id: 'redblue', url:'/hydromodel/api/redblue', description: 'Hydro Red Blue lights' }
+    redblue : { id: 'redblue', url:'/hydromodel/api/redblue', description: 'Hydro Red Blue lights' },
+    shutdown : { id: 'shutdown', url:'/hydromodel/api/shutdown', description: 'Hydro shutdown' }
   };
 
   constructor() {

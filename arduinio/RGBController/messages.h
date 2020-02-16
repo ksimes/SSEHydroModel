@@ -17,7 +17,13 @@ class Messages {
   public:    
     Messages();
     void anySerialEvent();
-    String read(boolean blocking);
     
-};
+    /* Is there a message waiting? 
+       This routine can wait for a message.
+       If no message to read then returns empty string.
+    */
+    String read(boolean blocking);
 
+    /* Has the other machine sent a message? */
+    boolean msgAvalable();
+};

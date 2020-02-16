@@ -1,9 +1,14 @@
+/*
+ * C++ class to handle serial processing, pulls in characters until a CR is received and then stores the string.
+ * Can store up to BUFFER_SIZE strings of MAX_MSG_SIZE length (see header file for details).
+ * 
+ * Updated S.King 02/02/2020 to add new functionality such as ping and msgAvalable functions.
+ */
 #include <Arduino.h>
 #include "messages.h"
 
 // Message format
 boolean crlf = true;    // If the laser scanner produces a cr/lf sequence rather than a cr or lf at the end of a line
-
 
 // message processing from the serial interface
 Messages::Messages() {
@@ -77,6 +82,14 @@ void Messages::anySerialEvent() {
 }
 
 /* Has the other machine sent a message? */
+boolean Messages::msgAvalable() {
+  return (msgAvailable);
+}
+
+/* Is there a message waiting? 
+   This routine can wait for a message.
+   If no message to read then returns empty string.
+*/
 String Messages::read(boolean blocking)
 {
   String result = "";
@@ -111,4 +124,3 @@ String Messages::read(boolean blocking)
     return "";
   }
 }
-
